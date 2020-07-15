@@ -26,6 +26,14 @@ class order_c:
 		self.orderId = PorderId
 		self.type    = binanceOrderType[Ptype]
 
+	def print(self):
+		print(f"Symbol: [{self.symb}]")
+		print(f"Side..: [{self.side}]")
+		print(f"Qtd...: [{self.qtd}]")
+		print(f"Price.: [{self.price}]")
+		print(f"Id....: [{self.orderId}]")
+		print(f"Type..: [{self.type}]")
+
 	@property
 	def symb(self) -> str:
 		return self._symb
@@ -68,7 +76,7 @@ class order_c:
 
 	@property
 	def type(self):
-		return self._orderId
+		return self._type
 
 	@type.setter
 	def type(self, value : str = ""):
@@ -129,7 +137,7 @@ def printOrders(spotOrder):
 def listOpenOrders(client) -> bool:
 
 	try:
-		openOrders = client.get_open_orders()
+		openOrders = client.get_open_orders() #recvWindow
 
 	except BinanceRequestException as e:
 		print(f"Erro at client.get_open_orders() BinanceRequestException: [{e.status_code} - {e.message}]")
@@ -198,21 +206,47 @@ def cancelOrder(client, idOrder : int, symb : str) -> bool:
 
 	return True
 
-def TS(order : order_c) -> bool:
+def TS(client, order : order_c) -> bool:
+#order.print()
+
 	return True
 
-def getOrderInfo(orderId : int) -> (bool, order_c):
-	order = order_c()
+#def getOrderInfo(client, symb : str, orderid : int) -> (bool, order_c):
+def getOrderInfo(client, orderid : int) -> (bool, order_c):
+
+	try:
+#		o = client.get_all_orders(symbol = "*", orderId = orderid, limit = 1)
+		o = client.get_open_margin_orders() #recvWindow
+
+	except BinanceAPIException as e:
+		print(f"Erro at client.get_all_orders() BinanceAPIException: [{e.status_code} - {e.message}]")
+		return (False, None)
+
+	except BinanceRequestException as e:
+		print(f"Erro at client.get_all_orders() BinanceRequestException: [{e.status_code} - {e.message}]")
+		return (False, None)
+
+	except:
+		print("Erro at client.get_all_orders()")
+		return (False, None)
+
+	if len(o) != 1:
+		return (False, None)
+
+	oa = next((item for item in o if item['orderId'] == orderid), None)
+
+	order = order_c(oa['symbol'], oa['side'], oa['origQty'], oa['price'], oa['orderId'], oa['type'])
 
 	return (True, order)
 
-def TS_createOrder(symb, side, priceLimit, qtdLimit, priceRefreshSeconds, triggerPercent, newPositPercent) -> bool:
+def TS_createOrder(client, symb, side, priceLimit, qtdLimit, priceRefreshSeconds, triggerPercent, newPositPercent) -> bool:
 	order = order_c()
-	TS(order)
+	TS(client, order)
 
-def TS_existingOrder(orderId : int, priceRefreshSeconds, triggerPercent, newPositPercent) -> bool:
-	(retORderInfo, order) = getOrderInfo(orderId)
-	TS(order)
+def TS_existingOrder(client, orderId : int, priceRefreshSeconds, triggerPercent, newPositPercent) -> bool:
+	(retORderInfo, order) = getOrderInfo(client, orderId)
+	order.print()
+	TS(client, order)
 
 def printPrice(client, symb : str) -> bool:
 
@@ -270,10 +304,10 @@ except:
 if len(argv) >= 2:
 
 	if argv[1] == '-n' and len(argv) == 9:
-		TS_createOrder(argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8])
+		TS_createOrder(client, argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8])
 
 	elif argv[1] == '-f' and len(argv) == 6:
-		TS_existingOrder(int(argv[2]), argv[3], argv[4], argv[5])
+		TS_existingOrder(client, int(argv[2]), argv[3], argv[4], argv[5])
 
 	elif argv[1] == '-i' and len(argv) == 2:
 		listOpenOrders(client)
