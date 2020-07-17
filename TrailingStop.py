@@ -147,8 +147,8 @@ def listOpenOrders(client) -> bool:
 		print(f"Erro at client.get_open_orders() BinanceAPIException: [{e.status_code} - {e.message}]")
 		return False
 
-	except:
-		print("Erro at client.get_open_orders()")
+	except Exception as e:
+		print("Erro at client.get_open_orders(): {e}")
 		return False
 
 	print(f"Spot open orders ({len(openOrders)}):")
@@ -167,8 +167,8 @@ def listOpenOrders(client) -> bool:
 		print(f"Erro at client.get_open_margin_orders() BinanceAPIException: [{e.status_code} - {e.message}]")
 		return False
 
-	except:
-		print("Erro at client.get_open_margin_orders()")
+	except Exception as e:
+		print("Erro at client.get_open_margin_orders(): {e}")
 		return False
 
 	print(f"Margin open orders ({len(openOrders)}):")
@@ -189,8 +189,8 @@ def cancelOrder(client, idOrder : int, symb : str) -> bool:
 		print(f"Erro at client.cancel_order() BinanceAPIException: [{e.status_code} - {e.message}]")
 		return False
 
-	except:
-		print("Erro at client.cancel_order()")
+	except Exception as e:
+		print("Erro at client.cancel_order(): {e}")
 		return False
 
 	print("Canceled order:")
@@ -226,8 +226,8 @@ def getOrderInfo(client, orderid : int) -> (bool, order_c):
 		print(f"Erro at client.get_all_orders() BinanceRequestException: [{e.status_code} - {e.message}]")
 		return (False, None)
 
-	except:
-		print("Erro at client.get_all_orders()")
+	except Exception as e:
+		print("Erro at client.get_all_orders(): {e}")
 		return (False, None)
 
 	if len(o) != 1:
@@ -261,8 +261,8 @@ def printPrice(client, symb : str) -> bool:
 		print(f"Erro at client.get_avg_price() BinanceRequestException: [{e.status_code} - {e.message}]")
 		return False
 
-	except:
-		print("Erro at client.get_avg_price()")
+	except Exception as e:
+		print("Erro at client.get_avg_price(): {e}")
 		return False
 
 	print(f"Symbol: [{symb}] | Price.: [{pa['lastPrice']}]")
@@ -297,8 +297,8 @@ except BinanceWithdrawException as e:
 	print(f"Binance withdraw exception: [{e.status_code} - {e.message}]")
 	exit(1)
 
-except:
-	print("Binance connection error")
+except Exception as e:
+	print("Binance connection error: {e}")
 	exit(1)
 
 if len(argv) >= 2:
