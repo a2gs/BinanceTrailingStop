@@ -11,28 +11,38 @@ from binance.client import Client
 from binance.exceptions import BinanceAPIException, BinanceWithdrawException, BinanceRequestException
 
 class order_c:
-	_symb    = str("")
-	_side    = str("")
-	_qtd     = int(0)
-	_price   = float(0.0)
-	_orderId = str("")
-	_type    = int(0)
+	_symb         = str("")
+	_side         = str("")
+	_qtd          = int(0)
+	_priceLimit   = float(0.0)
+	_priceTrigger = float(0.0)
+	_orderId      = str("")
+	_type         = int(0)
 
-	def __init__(self, Psymb : str = "", Pside : str = "", Pqtd : int = 0, Pprice : float = 0.0, PorderId : str = "", Ptype : str = ""):
-		self.symb    = Psymb
-		self.side    = Pside
-		self.qtd     = Pqtd
-		self.price   = Pprice
-		self.orderId = PorderId
-		self.type    = binanceOrderType[Ptype]
+	def __init__(self,
+	             Psymb         : str = "",
+	             Pside         : str = "",
+	             Pqtd          : int = 0,
+	             PpriceLimit   : float = 0.0,
+	             PpriceTrigger : float = 0.0,
+	             PorderId      : str = "",
+	             Ptype         : str = ""):
+		self.symb         = Psymb
+		self.side         = Pside
+		self.qtd          = Pqtd
+		self.priceLimit   = PpriceLimit
+		self.priceTrigger = PpriceTrigger
+		self.orderId      = PorderId
+		self.type         = binanceOrderType[Ptype]
 
 	def print(self):
-		print(f"Symbol: [{self.symb}]")
-		print(f"Side..: [{self.side}]")
-		print(f"Qtd...: [{self.qtd}]")
-		print(f"Price.: [{self.price}]")
-		print(f"Id....: [{self.orderId}]")
-		print(f"Type..: [{self.type}]")
+		print(f"Symbol.......: [{self.symb}]")
+		print(f"Side.........: [{self.side}]")
+		print(f"Qtd..........: [{self.qtd}]")
+		print(f"Price Limit..: [{self.priceLimit}]")
+		print(f"Price Trigger: [{self.priceTrigger}]")
+		print(f"Id...........: [{self.orderId}]")
+		print(f"Type.........: [{self.type}]")
 
 	@property
 	def symb(self) -> str:
@@ -59,12 +69,20 @@ class order_c:
 		self._qtd = value
 
 	@property
-	def price(self):
-		return self._price
+	def priceLimit(self):
+		return self._priceLimit
 
-	@price.setter
-	def price(self, value : int = 0):
-		self._price = value
+	@priceLimit.setter
+	def priceLimit(self, value : int = 0):
+		self._priceLimit = value
+
+	@property
+	def priceTrigger(self):
+		return self._priceTrigger
+
+	@priceTrigger.setter
+	def priceTrigger(self, value : int = 0):
+		self._priceTrigger = value
 
 	@property
 	def orderId(self):
@@ -241,12 +259,14 @@ def getOrderInfo(client, orderid : int) -> (bool, order_c):
 
 def TS_createOrder(client, symb, side, priceLimit, qtdLimit, priceRefreshSeconds, triggerPercent, newPositPercent) -> bool:
 	order = order_c()
-	TS(client, order)
+	if TS(client, order) == False:
+		return False
 
 def TS_existingOrder(client, orderId : int, priceRefreshSeconds, triggerPercent, newPositPercent) -> bool:
 	(retORderInfo, order) = getOrderInfo(client, orderId)
 	order.print()
-	TS(client, order)
+	if TS(client, order) == False:
+		return False
 
 def printPrice(client, symb : str) -> bool:
 
